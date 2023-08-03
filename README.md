@@ -1,6 +1,15 @@
 # keycloak-services-social-wechat-work
 
-Keycloak企业微信登录插件
+--- 
+
+> Keycloak企业微信登录插件
+
+## Build package
+
+```shell
+mvn clean install
+mvn clean package -e -U
+```
 
 Keycloak 15.0.0 测试通过【感谢[potterhe](https://github.com/potterhe)适配新版】
 

@@ -319,7 +319,10 @@ public class WechatWorkIdentityProvider
             try {
                 AuthenticationSessionModel authSession =
                         this.callback.getAndVerifyAuthenticationSession(state);
-                session.getContext().setAuthenticationSession(authSession);
+
+                if (session != null) {
+                    session.getContext().setAuthenticationSession(authSession);
+                }
 
                 if (error != null) {
                     logger.error(error + " for broker login " + getConfig().getProviderId());
