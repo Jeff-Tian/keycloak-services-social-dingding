@@ -29,7 +29,7 @@ public class WechatWorkIdentityProviderFactory
 
   @Override
   public String getName() {
-    return "WechatWork";
+    return "WechatWork 企业微信";
   }
 
   @Override

@@ -21,11 +21,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.GET;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.*;
 
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.*;
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
@@ -256,12 +256,17 @@ public class WechatWorkIdentityProvider
 
     @Override
     protected UriBuilder createAuthorizationUrl(AuthenticationRequest request) {
+        logger.info("Creating Auth Url...");
 
         final UriBuilder uriBuilder;
 
         String ua = request.getSession().getContext().getRequestHeaders().getHeaderString("user-agent");
 
+        logger.info("构建授权链接。user-agent=" + ua + ", request=" + request);
+
         if (ua.contains("wxwork")) {
+            logger.info("企业微信内部浏览器");
+
             uriBuilder = UriBuilder.fromUri(getConfig().getAuthorizationUrl());
             uriBuilder
                     .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
@@ -271,6 +276,8 @@ public class WechatWorkIdentityProvider
                     .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
             uriBuilder.fragment(WEIXIN_REDIRECT_FRAGMENT);
         } else {
+            logger.info("企业微信外部浏览器");
+
             uriBuilder = UriBuilder.fromUri(getConfig().getQrcodeAuthorizationUrl());
             uriBuilder
                     .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
@@ -278,6 +285,8 @@ public class WechatWorkIdentityProvider
                     .queryParam(OAUTH2_PARAMETER_REDIRECT_URI, request.getRedirectUri())
                     .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
         }
+
+        logger.info("授权链接是：" + uriBuilder.build().toString());
         return uriBuilder;
     }
 
@@ -327,7 +336,7 @@ public class WechatWorkIdentityProvider
                 if (error != null) {
                     logger.error(error + " for broker login " + getConfig().getProviderId());
                     if (error.equals(ACCESS_DENIED)) {
-                        return callback.cancelled();
+                        return callback.cancelled(getConfig());
                     } else if (error.equals(OAuthErrorException.LOGIN_REQUIRED)
                             || error.equals(OAuthErrorException.INTERACTION_REQUIRED)) {
                         return callback.error(error);
