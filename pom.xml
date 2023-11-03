@@ -20,7 +20,7 @@
         <repository>
             <id>github</id>
             <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/jeff-tian/keycloak-service-social-wechat-work</url>
+            <url>https://maven.pkg.github.com/jeff-tian/keycloak-services-social-wechatwork</url>
         </repository>
     </distributionManagement>
 
