@@ -20,6 +20,10 @@ import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
 import org.keycloak.broker.social.SocialIdentityProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.provider.ProviderConfigurationBuilder;
+
+import java.util.List;
 
 public class WechatWorkIdentityProviderFactory
     extends AbstractIdentityProviderFactory<WechatWorkIdentityProvider>
@@ -29,7 +33,7 @@ public class WechatWorkIdentityProviderFactory
 
   @Override
   public String getName() {
-    return "WechatWork 企业微信";
+    return "企业微信 WeCom";
   }
 
   @Override
@@ -45,5 +49,18 @@ public class WechatWorkIdentityProviderFactory
   @Override
   public String getId() {
     return PROVIDER_ID;
+  }
+
+  @Override
+  public List<ProviderConfigProperty> getConfigProperties() {
+    return ProviderConfigurationBuilder.create()
+            .property().name(WechatWorkIdentityProvider.OAUTH2_PARAMETER_AGENT_ID)
+            .label("企业微信 Agent ID")
+            .helpText("企业微信 Agent ID")
+            .type(ProviderConfigProperty.STRING_TYPE)
+            .defaultValue("1000004")
+            .add()
+
+            .build();
   }
 }

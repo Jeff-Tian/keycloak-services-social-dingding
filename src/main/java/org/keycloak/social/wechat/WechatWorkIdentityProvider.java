@@ -265,7 +265,9 @@ public class WechatWorkIdentityProvider
         logger.info("构建授权链接。user-agent=" + ua + ", request=" + request);
 
         if (ua.contains("wxwork")) {
-            logger.info("企业微信内部浏览器");
+            logger.infov("企业微信内部浏览器，构建授权链接参数列表：{0}={1}; {2}={3}; {4}={5}; {6}={7}; {8}={9}; {10}={11}", "auth Url", getConfig().getAuthorizationUrl(), OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId(), OAUTH2_PARAMETER_REDIRECT_URI,
+                    request.getRedirectUri(), OAUTH2_PARAMETER_RESPONSE_TYPE, DEFAULT_RESPONSE_TYPE, OAUTH2_PARAMETER_SCOPE,
+                    getConfig().getDefaultScope(), OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
 
             uriBuilder = UriBuilder.fromUri(getConfig().getAuthorizationUrl());
             uriBuilder
@@ -276,7 +278,10 @@ public class WechatWorkIdentityProvider
                     .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
             uriBuilder.fragment(WEIXIN_REDIRECT_FRAGMENT);
         } else {
-            logger.info("企业微信外部浏览器");
+            logger.infov("企业微信外部浏览器，构建授权链接参数列表：{0}={1}; {2}={3}; {4}={5}; {6}={7}; {8}={9}; {10}={11}", "authUrl", getConfig().getQrcodeAuthorizationUrl(), OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId(),
+                    OAUTH2_PARAMETER_AGENT_ID, getConfig().getAgentId(),
+                    OAUTH2_PARAMETER_REDIRECT_URI, request.getRedirectUri(),
+                    OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
 
             uriBuilder = UriBuilder.fromUri(getConfig().getQrcodeAuthorizationUrl());
             uriBuilder

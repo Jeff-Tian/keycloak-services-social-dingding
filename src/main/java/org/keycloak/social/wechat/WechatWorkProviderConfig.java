@@ -14,11 +14,11 @@ public class WechatWorkProviderConfig extends OAuth2IdentityProviderConfig {
   }
 
   public String getAgentId() {
-    return getConfig().get("agentId");
+    return getConfig().get(WechatWorkIdentityProvider.OAUTH2_PARAMETER_AGENT_ID);
   }
 
   public void setAgentId(String agentId) {
-    getConfig().put("agentId", agentId);
+    getConfig().put(WechatWorkIdentityProvider.OAUTH2_PARAMETER_AGENT_ID, agentId);
   }
 
   public String getQrcodeAuthorizationUrl() {
