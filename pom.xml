@@ -3,12 +3,13 @@
     <parent>
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-parent</artifactId>
-        <version>20.0.0</version>
+        <version>22.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>keycloak-services-social-wechat-work</artifactId>
     <name>Keycloak Services Social WeCom</name>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
+    <version>22.0.1</version>
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -24,8 +25,6 @@
     </distributionManagement>
 
     <build>
-        <finalName>keycloak-services-social-wechat-work</finalName>
-
         <pluginManagement>
             <plugins>
                 <plugin>
