@@ -66,7 +66,7 @@ public class WechatWorkIdentityProvider
     public static final String PROFILE_DETAIL_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/get";
 
     public static final String OAUTH2_PARAMETER_CLIENT_ID = "appid";
-    public static final String OAUTH2_PARAMETER_AGENT_ID = "agentid";
+    public static final String OAUTH2_PARAMETER_AGENT_ID = "agentId";
     public static final String OAUTH2_PARAMETER_RESPONSE_TYPE = "response_type";
 
     public static final String WEIXIN_CORP_ID = "corpid";
@@ -286,7 +286,7 @@ public class WechatWorkIdentityProvider
             uriBuilder = UriBuilder.fromUri(getConfig().getQrcodeAuthorizationUrl());
             uriBuilder
                     .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
-                    .queryParam(OAUTH2_PARAMETER_AGENT_ID, getConfig().getAgentId())
+                    .queryParam(OAUTH2_PARAMETER_AGENT_ID.toLowerCase(), getConfig().getAgentId())
                     .queryParam(OAUTH2_PARAMETER_REDIRECT_URI, request.getRedirectUri())
                     .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
         }
