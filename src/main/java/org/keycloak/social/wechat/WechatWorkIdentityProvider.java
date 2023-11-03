@@ -64,6 +64,7 @@ public class WechatWorkIdentityProvider
 
     public static final String PROFILE_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo";
     public static final String PROFILE_DETAIL_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/get";
+    public static final String USER_DETAIL_URL = "https://qyapi.weixin.qq.com/cgi-bin/auth/getuserdetail";
 
     public static final String OAUTH2_PARAMETER_CLIENT_ID = "appid";
     public static final String OAUTH2_PARAMETER_AGENT_ID = "agentId";
@@ -182,9 +183,11 @@ public class WechatWorkIdentityProvider
         if (email == null || email.length() == 0) {
             email = getJsonProperty(profile, "email");
         }
-        identity.setFirstName(email.split("@")[0].toLowerCase());
+        if(email != null) {
+            identity.setFirstName(email.split("@")[0].toLowerCase());
+            identity.setEmail(email);
+        }
         identity.setLastName(getJsonProperty(profile, "name"));
-        identity.setEmail(email);
         // 手机号码，第三方仅通讯录应用可获取
         identity.setUserAttribute(PROFILE_MOBILE, getJsonProperty(profile, "mobile"));
         // 性别。0表示未定义，1表示男性，2表示女性
@@ -204,6 +207,8 @@ public class WechatWorkIdentityProvider
     }
 
     public BrokeredIdentityContext getFederatedIdentity(String authorizationCode) {
+        logger.info("getting federated identity");
+
         String accessToken = getAccessToken();
         if (accessToken == null) {
             throw new IdentityBrokerException("No access token available");
@@ -220,7 +225,7 @@ public class WechatWorkIdentityProvider
             // 全局错误码 https://work.weixin.qq.com/api/doc/90001/90148/90455
             // 42001	access_token已过期
             // 40014	不合法的access_token
-            logger.info("profile first " + profile.toString());
+            logger.info("profile in federation " + profile.toString());
             long errorCode = profile.get("errcode").asInt();
             if (errorCode == 42001 || errorCode == 40014) {
                 accessToken = resetAccessToken();
@@ -239,7 +244,6 @@ public class WechatWorkIdentityProvider
                             .param(ACCESS_TOKEN_KEY, accessToken)
                             .param("userid", getJsonProperty(profile, "UserId"))
                             .asJson();
-            //            logger.info("get userInfo =" + profile.toString());
             context = extractIdentityFromProfile(null, profile);
             context.getContextData().put(FEDERATED_ACCESS_TOKEN, accessToken);
         } catch (Exception e) {
