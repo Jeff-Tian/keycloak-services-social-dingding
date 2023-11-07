@@ -3,17 +3,17 @@
     <parent>
         <groupId>org.keycloak</groupId>
         <artifactId>keycloak-parent</artifactId>
-        <version>21.1.1</version>
+        <version>22.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>keycloak-services-social-dingtalk</artifactId>
     <name>Keycloak Services Social DingTalk</name>
     <packaging>jar</packaging>
-    <version>21.1.1</version>
+    <version>22.0.1</version>
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <keycloak.version>21.1.1</keycloak.version>
+        <keycloak.version>22.0.1</keycloak.version>
     </properties>
 
     <distributionManagement>

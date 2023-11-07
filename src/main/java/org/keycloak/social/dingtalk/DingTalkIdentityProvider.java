@@ -66,7 +66,6 @@ public class DingTalkIdentityProvider
 
     public static final String PROFILE_MOBILE = "mobile";
 
-    private final String ACCESS_TOKEN_KEY = "access_token";
     private final String ACCESS_TOKEN_CACHE_KEY = "ding_talk_access_token";
 
     private static final DefaultCacheManager cacheManager = new DefaultCacheManager();
@@ -93,7 +92,7 @@ public class DingTalkIdentityProvider
 
     private Cache<String, String> getCache() {
         return caches.computeIfAbsent(
-                getConfig().getClientId() + ":" + getConfig().getAgentId(),
+                getConfig().getClientId() + ":",
                 DingTalkIdentityProvider::createCache);
     }
 
@@ -109,6 +108,7 @@ public class DingTalkIdentityProvider
                     }
                     logger.debug("retry in renew access token " + j);
                 }
+                String ACCESS_TOKEN_KEY = "access_token";
                 token = getJsonProperty(j, ACCESS_TOKEN_KEY);
                 long timeout = Integer.parseInt(getJsonProperty(j, "expires_in"));
                 getCache().put(ACCESS_TOKEN_CACHE_KEY, token, timeout, TimeUnit.SECONDS);
