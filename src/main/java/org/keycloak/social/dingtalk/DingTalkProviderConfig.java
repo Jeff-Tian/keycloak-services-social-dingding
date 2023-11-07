@@ -1,24 +1,24 @@
-package org.keycloak.social.wechat;
+package org.keycloak.social.dingtalk;
 
 import org.keycloak.broker.oidc.OAuth2IdentityProviderConfig;
 import org.keycloak.models.IdentityProviderModel;
 
-public class WechatWorkProviderConfig extends OAuth2IdentityProviderConfig {
+public class DingTalkProviderConfig extends OAuth2IdentityProviderConfig {
 
-  public WechatWorkProviderConfig(IdentityProviderModel model) {
+  public DingTalkProviderConfig(IdentityProviderModel model) {
     super(model);
   }
 
-  public WechatWorkProviderConfig() {
+  public DingTalkProviderConfig() {
     super();
   }
 
   public String getAgentId() {
-    return getConfig().get(WechatWorkIdentityProvider.OAUTH2_PARAMETER_AGENT_ID);
+    return getConfig().get(DingTalkIdentityProvider.OAUTH2_PARAMETER_AGENT_ID);
   }
 
   public void setAgentId(String agentId) {
-    getConfig().put(WechatWorkIdentityProvider.OAUTH2_PARAMETER_AGENT_ID, agentId);
+    getConfig().put(DingTalkIdentityProvider.OAUTH2_PARAMETER_AGENT_ID, agentId);
   }
 
   public String getQrcodeAuthorizationUrl() {

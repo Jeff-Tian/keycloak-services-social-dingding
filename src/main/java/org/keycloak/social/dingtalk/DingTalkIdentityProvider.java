@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.keycloak.social.wechat;
+package org.keycloak.social.dingtalk;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -48,47 +48,35 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
+import org.keycloak.social.dingtalk.models.TokenRequest;
 
-public class WechatWorkIdentityProvider
-        extends AbstractOAuth2IdentityProvider<WechatWorkProviderConfig>
-        implements SocialIdentityProvider<WechatWorkProviderConfig> {
+public class DingTalkIdentityProvider
+        extends AbstractOAuth2IdentityProvider<DingTalkProviderConfig>
+        implements SocialIdentityProvider<DingTalkProviderConfig> {
 
-    public static final String AUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize";
-    public static final String QRCODE_AUTH_URL =
-            "https://open.work.weixin.qq.com/wwopen/sso/qrConnect"; // 企业微信外使用
-    public static final String TOKEN_URL = "https://qyapi.weixin.qq.com/cgi-bin/gettoken";
+    public static final String AUTH_URL = "https://login.dingtalk.com/oauth2/auth";
+    public static final String TOKEN_URL = "https://api.dingtalk.com/v1.0/oauth2/userAccessToken";
+    public static final String PROFILE_URL = "https://api.dingtalk.com/v1.0/contact/users/me";
 
-    public static final String DEFAULT_SCOPE = "snsapi_base";
+    public static final String DEFAULT_SCOPE = "openid corpid";
     public static final String DEFAULT_RESPONSE_TYPE = "code";
-    public static final String WEIXIN_REDIRECT_FRAGMENT = "wechat_redirect";
 
-    public static final String PROFILE_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo";
-    public static final String PROFILE_DETAIL_URL = "https://qyapi.weixin.qq.com/cgi-bin/user/get";
-    public static final String USER_DETAIL_URL = "https://qyapi.weixin.qq.com/cgi-bin/auth/getuserdetail";
-
-    public static final String OAUTH2_PARAMETER_CLIENT_ID = "appid";
-    public static final String OAUTH2_PARAMETER_AGENT_ID = "agentId";
+    public static final String OAUTH2_PARAMETER_CLIENT_ID = "client_id";
     public static final String OAUTH2_PARAMETER_RESPONSE_TYPE = "response_type";
 
-    public static final String WEIXIN_CORP_ID = "corpid";
-    public static final String WEIXIN_CORP_SECRET = "corpsecret";
     public static final String PROFILE_MOBILE = "mobile";
-    public static final String PROFILE_GENDER = "gender";
-    public static final String PROFILE_STATUS = "status";
-    public static final String PROFILE_ENABLE = "enable";
-    public static final String PROFILE_USERID = "userid";
 
     private final String ACCESS_TOKEN_KEY = "access_token";
-    private final String ACCESS_TOKEN_CACHE_KEY = "wechat_work_sso_access_token";
+    private final String ACCESS_TOKEN_CACHE_KEY = "ding_talk_access_token";
 
     private static final DefaultCacheManager cacheManager = new DefaultCacheManager();
-    private static final String WECHAT_WORK_CACHE_NAME = "wechat_work_sso";
+    private static final String DING_TALK_CACHE_NAME = "ding_talk";
     private static final ConcurrentMap<String, Cache<String, String>> caches =
             new ConcurrentHashMap<>();
 
     private static Cache<String, String> createCache(String suffix) {
         try {
-            String cacheName = WECHAT_WORK_CACHE_NAME + ":" + suffix;
+            String cacheName = DING_TALK_CACHE_NAME + ":" + suffix;
 
             ConfigurationBuilder config = new ConfigurationBuilder();
             cacheManager.defineConfiguration(cacheName, config.build());
@@ -106,16 +94,16 @@ public class WechatWorkIdentityProvider
     private Cache<String, String> getCache() {
         return caches.computeIfAbsent(
                 getConfig().getClientId() + ":" + getConfig().getAgentId(),
-                WechatWorkIdentityProvider::createCache);
+                DingTalkIdentityProvider::createCache);
     }
 
-    private String getAccessToken() {
+    private String getAccessToken(String authCode) {
         try {
             String token = getCache().get(ACCESS_TOKEN_CACHE_KEY);
             if (token == null) {
-                JsonNode j = renewAccessToken();
+                JsonNode j = renewAccessToken(authCode);
                 if (j == null) {
-                    j = renewAccessToken();
+                    j = renewAccessToken(authCode);
                     if (j == null) {
                         throw new Exception("renew access token error");
                     }
@@ -133,11 +121,12 @@ public class WechatWorkIdentityProvider
         return null;
     }
 
-    private JsonNode renewAccessToken() {
+    private JsonNode renewAccessToken(String authCode) {
+        TokenRequest tokenRequest = new TokenRequest(getConfig().getClientId(), getConfig().getClientSecret(), authCode, null, "authorization_code");
+
         try {
-            return SimpleHttp.doGet(TOKEN_URL, session)
-                    .param(WEIXIN_CORP_ID, getConfig().getClientId())
-                    .param(WEIXIN_CORP_SECRET, getConfig().getClientSecret())
+            return SimpleHttp.doPost(TOKEN_URL, session)
+                    .json(tokenRequest)
                     .asJson();
         } catch (Exception e) {
             logger.error(e);
@@ -146,15 +135,14 @@ public class WechatWorkIdentityProvider
         return null;
     }
 
-    private String resetAccessToken() {
+    private String resetAccessToken(String authCode) {
         getCache().remove(ACCESS_TOKEN_CACHE_KEY);
-        return getAccessToken();
+        return getAccessToken(authCode);
     }
 
-    public WechatWorkIdentityProvider(KeycloakSession session, WechatWorkProviderConfig config) {
+    public DingTalkIdentityProvider(KeycloakSession session, DingTalkProviderConfig config) {
         super(session, config);
         config.setAuthorizationUrl(AUTH_URL);
-        config.setQrcodeAuthorizationUrl(QRCODE_AUTH_URL);
         config.setTokenUrl(TOKEN_URL);
     }
 
@@ -172,32 +160,20 @@ public class WechatWorkIdentityProvider
     protected BrokeredIdentityContext extractIdentityFromProfile(
             EventBuilder event, JsonNode profile) {
         logger.info(profile.toString());
-        // profile: see https://work.weixin.qq.com/api/doc#90000/90135/90196
         BrokeredIdentityContext identity =
-                new BrokeredIdentityContext((getJsonProperty(profile, "userid")));
+                new BrokeredIdentityContext((getJsonProperty(profile, "unionId")));
 
-        identity.setUsername(getJsonProperty(profile, "userid").toLowerCase());
-        identity.setBrokerUserId(getJsonProperty(profile, "userid").toLowerCase());
-        identity.setModelUsername(getJsonProperty(profile, "userid").toLowerCase());
-        String email = getJsonProperty(profile, "biz_mail");
-        if (email == null || email.length() == 0) {
-            email = getJsonProperty(profile, "email");
-        }
-        if(email != null) {
+        identity.setUsername(getJsonProperty(profile, "nick").toLowerCase());
+        identity.setBrokerUserId(getJsonProperty(profile, "unionid").toLowerCase());
+        identity.setModelUsername(getJsonProperty(profile, "nick").toLowerCase());
+        String email = getJsonProperty(profile, "email");
+        if (email != null) {
             identity.setFirstName(email.split("@")[0].toLowerCase());
             identity.setEmail(email);
         }
-        identity.setLastName(getJsonProperty(profile, "name"));
+        identity.setLastName(getJsonProperty(profile, "nick"));
         // 手机号码，第三方仅通讯录应用可获取
         identity.setUserAttribute(PROFILE_MOBILE, getJsonProperty(profile, "mobile"));
-        // 性别。0表示未定义，1表示男性，2表示女性
-        identity.setUserAttribute(PROFILE_GENDER, getJsonProperty(profile, "gender"));
-        // 激活状态: 1=已激活，2=已禁用，4=未激活。
-        // 已激活代表已激活企业微信或已关注微工作台（原企业号）。未激活代表既未激活企业微信又未关注微工作台（原企业号）。
-        identity.setUserAttribute(PROFILE_STATUS, getJsonProperty(profile, "status"));
-        // 成员启用状态。1表示启用的成员，0表示被禁用。注意，服务商调用接口不会返回此字段
-        identity.setUserAttribute(PROFILE_ENABLE, getJsonProperty(profile, "enable"));
-        identity.setUserAttribute(PROFILE_USERID, getJsonProperty(profile, "userid"));
 
         identity.setIdpConfig(getConfig());
         identity.setIdp(this);
@@ -209,7 +185,7 @@ public class WechatWorkIdentityProvider
     public BrokeredIdentityContext getFederatedIdentity(String authorizationCode) {
         logger.info("getting federated identity");
 
-        String accessToken = getAccessToken();
+        String accessToken = getAccessToken(authorizationCode);
         if (accessToken == null) {
             throw new IdentityBrokerException("No access token available");
         }
@@ -218,32 +194,10 @@ public class WechatWorkIdentityProvider
             JsonNode profile;
             profile =
                     SimpleHttp.doGet(PROFILE_URL, session)
-                            .param(ACCESS_TOKEN_KEY, accessToken)
-                            .param("code", authorizationCode)
+                            .header("x-acs-dingtalk-access-token", accessToken)
                             .asJson();
-            // {"UserId":"ZhongXun","DeviceId":"10000556333395ZN","errcode":0,"errmsg":"ok"}
-            // 全局错误码 https://work.weixin.qq.com/api/doc/90001/90148/90455
-            // 42001	access_token已过期
-            // 40014	不合法的access_token
             logger.info("profile in federation " + profile.toString());
-            long errorCode = profile.get("errcode").asInt();
-            if (errorCode == 42001 || errorCode == 40014) {
-                accessToken = resetAccessToken();
-                profile =
-                        SimpleHttp.doGet(PROFILE_URL, session)
-                                .param(ACCESS_TOKEN_KEY, accessToken)
-                                .param("code", authorizationCode)
-                                .asJson();
-                logger.info("profile retried " + profile.toString());
-            }
-            if (errorCode != 0) {
-                throw new IdentityBrokerException("get user info failed, please retry");
-            }
-            profile =
-                    SimpleHttp.doGet(PROFILE_DETAIL_URL, session)
-                            .param(ACCESS_TOKEN_KEY, accessToken)
-                            .param("userid", getJsonProperty(profile, "UserId"))
-                            .asJson();
+
             context = extractIdentityFromProfile(null, profile);
             context.getContextData().put(FEDERATED_ACCESS_TOKEN, accessToken);
         } catch (Exception e) {
@@ -268,32 +222,18 @@ public class WechatWorkIdentityProvider
 
         logger.info("构建授权链接。user-agent=" + ua + ", request=" + request);
 
-        if (ua.contains("wxwork")) {
-            logger.infov("企业微信内部浏览器，构建授权链接参数列表：{0}={1}; {2}={3}; {4}={5}; {6}={7}; {8}={9}; {10}={11}", "auth Url", getConfig().getAuthorizationUrl(), OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId(), OAUTH2_PARAMETER_REDIRECT_URI,
-                    request.getRedirectUri(), OAUTH2_PARAMETER_RESPONSE_TYPE, DEFAULT_RESPONSE_TYPE, OAUTH2_PARAMETER_SCOPE,
-                    getConfig().getDefaultScope(), OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
+        logger.infov("构建授权链接参数列表：{0}={1}; {2}={3}; {4}={5}; {6}={7}; {8}={9}; {10}={11}", "auth Url", getConfig().getAuthorizationUrl(), OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId(), OAUTH2_PARAMETER_REDIRECT_URI,
+                request.getRedirectUri(), OAUTH2_PARAMETER_RESPONSE_TYPE, DEFAULT_RESPONSE_TYPE, OAUTH2_PARAMETER_SCOPE,
+                getConfig().getDefaultScope(), OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
 
-            uriBuilder = UriBuilder.fromUri(getConfig().getAuthorizationUrl());
-            uriBuilder
-                    .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
-                    .queryParam(OAUTH2_PARAMETER_REDIRECT_URI, request.getRedirectUri())
-                    .queryParam(OAUTH2_PARAMETER_RESPONSE_TYPE, DEFAULT_RESPONSE_TYPE)
-                    .queryParam(OAUTH2_PARAMETER_SCOPE, getConfig().getDefaultScope())
-                    .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
-            uriBuilder.fragment(WEIXIN_REDIRECT_FRAGMENT);
-        } else {
-            logger.infov("企业微信外部浏览器，构建授权链接参数列表：{0}={1}; {2}={3}; {4}={5}; {6}={7}; {8}={9}; {10}={11}", "authUrl", getConfig().getQrcodeAuthorizationUrl(), OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId(),
-                    OAUTH2_PARAMETER_AGENT_ID, getConfig().getAgentId(),
-                    OAUTH2_PARAMETER_REDIRECT_URI, request.getRedirectUri(),
-                    OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
+        uriBuilder = UriBuilder.fromUri(getConfig().getAuthorizationUrl());
+        uriBuilder
+                .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
+                .queryParam(OAUTH2_PARAMETER_REDIRECT_URI, request.getRedirectUri())
+                .queryParam(OAUTH2_PARAMETER_RESPONSE_TYPE, DEFAULT_RESPONSE_TYPE)
+                .queryParam(OAUTH2_PARAMETER_SCOPE, getConfig().getDefaultScope())
+                .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
 
-            uriBuilder = UriBuilder.fromUri(getConfig().getQrcodeAuthorizationUrl());
-            uriBuilder
-                    .queryParam(OAUTH2_PARAMETER_CLIENT_ID, getConfig().getClientId())
-                    .queryParam(OAUTH2_PARAMETER_AGENT_ID.toLowerCase(), getConfig().getAgentId())
-                    .queryParam(OAUTH2_PARAMETER_REDIRECT_URI, request.getRedirectUri())
-                    .queryParam(OAUTH2_PARAMETER_STATE, request.getState().getEncoded());
-        }
 
         logger.info("授权链接是：" + uriBuilder.build().toString());
         return uriBuilder;
@@ -325,9 +265,8 @@ public class WechatWorkIdentityProvider
         @GET
         public Response authResponse(
                 @QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_STATE) String state,
-                @QueryParam(AbstractOAuth2IdentityProvider.OAUTH2_PARAMETER_CODE) String authorizationCode,
-                @QueryParam(OAuth2Constants.ERROR) String error,
-                @QueryParam("appid") String client_id) {
+                @QueryParam("authCode") String authorizationCode,
+                @QueryParam(OAuth2Constants.ERROR) String error) {
             logger.info("OAUTH2_PARAMETER_CODE=" + authorizationCode);
 
             // 以下样版代码从 AbstractOAuth2IdentityProvider 里获取的。
@@ -358,7 +297,7 @@ public class WechatWorkIdentityProvider
                     BrokeredIdentityContext federatedIdentity = getFederatedIdentity(authorizationCode);
 
                     federatedIdentity.setIdpConfig(getConfig());
-                    federatedIdentity.setIdp(WechatWorkIdentityProvider.this);
+                    federatedIdentity.setIdp(DingTalkIdentityProvider.this);
                     federatedIdentity.setAuthenticationSession(authSession);
 
                     return callback.authenticated(federatedIdentity);
@@ -384,10 +323,6 @@ public class WechatWorkIdentityProvider
     public void updateBrokeredUser(
             KeycloakSession session, RealmModel realm, UserModel user, BrokeredIdentityContext context) {
         user.setSingleAttribute(PROFILE_MOBILE, context.getUserAttribute(PROFILE_MOBILE));
-        user.setSingleAttribute(PROFILE_GENDER, context.getUserAttribute(PROFILE_GENDER));
-        user.setSingleAttribute(PROFILE_STATUS, context.getUserAttribute(PROFILE_STATUS));
-        user.setSingleAttribute(PROFILE_ENABLE, context.getUserAttribute(PROFILE_ENABLE));
-        user.setSingleAttribute(PROFILE_USERID, context.getUserAttribute(PROFILE_USERID));
 
         user.setUsername(context.getUsername());
         user.setFirstName(context.getFirstName());
