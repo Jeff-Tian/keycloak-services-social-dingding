@@ -29,7 +29,7 @@ public class DingTalkIdentityProviderFactory
 
   @Override
   public String getName() {
-    return "钉钉";
+    return "钉钉登录";
   }
 
   @Override
