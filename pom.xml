@@ -1,19 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.keycloak</groupId>
-        <artifactId>keycloak-parent</artifactId>
-        <version>22.0.1</version>
-    </parent>
+    <groupId>org.keycloak</groupId>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>keycloak-services-social-dingding</artifactId>
     <name>Keycloak Services Social DingDing</name>
     <packaging>jar</packaging>
-    <version>22.0.5</version>
+    <version>22.0.6</version>
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
         <keycloak.version>22.0.1</keycloak.version>
+        <infinispan.version>15.0.0.Dev04</infinispan.version>
     </properties>
 
     <distributionManagement>
@@ -96,6 +93,7 @@
         <dependency>
             <groupId>org.infinispan</groupId>
             <artifactId>infinispan-core</artifactId>
+            <version>${infinispan.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

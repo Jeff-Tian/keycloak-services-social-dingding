@@ -110,12 +110,11 @@ public class DingDingIdentityProvider
                     logger.info("retry in renew access token " + j);
                 }
                 logger.infov("Access token is {0}", j.toString());
-                String ACCESS_TOKEN_KEY = "access_token";
-                token = getJsonProperty(j, ACCESS_TOKEN_KEY);
+                token = getJsonProperty(j, "accessToken");
                 logger.infov("Access token is {0}", token);
-                logger.infov("expires_in is {0}", getJsonProperty(j, "expires_in"));
+                logger.infov("expires_in is {0}", getJsonProperty(j, "expireIn"));
                 try {
-                    long timeout = Integer.parseInt(getJsonProperty(j, "expires_in"));
+                    long timeout = Integer.parseInt(getJsonProperty(j, "expireIn"));
                     getCache().put(ACCESS_TOKEN_CACHE_KEY, token, timeout, TimeUnit.SECONDS);
                 } catch (Exception ex) {
                     logger.error(ex);
