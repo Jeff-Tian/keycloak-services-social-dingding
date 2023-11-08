@@ -25,7 +25,7 @@ public class DingDingIdentityProviderFactory
     extends AbstractIdentityProviderFactory<DingDingIdentityProvider>
     implements SocialIdentityProviderFactory<DingDingIdentityProvider> {
 
-  public static final String PROVIDER_ID = "ding-talk";
+  public static final String PROVIDER_ID = "ding-ding";
 
   @Override
   public String getName() {

@@ -19,7 +19,7 @@ public class DingDingUserAttributeMapper extends AbstractJsonUserAttributeMapper
 
   @Override
   public String getId() {
-    return "dingtalk-work-user-attribute-mapper";
+    return "dingding-user-attribute-mapper";
   }
 
   @Override
