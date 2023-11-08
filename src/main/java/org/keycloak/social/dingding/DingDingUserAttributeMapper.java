@@ -1,4 +1,4 @@
-package org.keycloak.social.dingtalk;
+package org.keycloak.social.dingding;
 
 import org.keycloak.broker.oidc.mappers.AbstractJsonUserAttributeMapper;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -8,9 +8,9 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
 /** User attribute mapper. */
-public class DingTalkUserAttributeMapper extends AbstractJsonUserAttributeMapper {
-  private static final String PROFILE_MOBILE = DingTalkIdentityProvider.PROFILE_MOBILE;
-  private static final String[] cp = new String[] {DingTalkIdentityProviderFactory.PROVIDER_ID};
+public class DingDingUserAttributeMapper extends AbstractJsonUserAttributeMapper {
+  private static final String PROFILE_MOBILE = DingDingIdentityProvider.PROFILE_MOBILE;
+  private static final String[] cp = new String[] {DingDingIdentityProviderFactory.PROVIDER_ID};
 
   @Override
   public String[] getCompatibleProviders() {

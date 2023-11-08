@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.keycloak.social.dingtalk;
+package org.keycloak.social.dingding;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -48,11 +48,11 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorPage;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.sessions.AuthenticationSessionModel;
-import org.keycloak.social.dingtalk.models.TokenRequest;
+import org.keycloak.social.dingding.models.TokenRequest;
 
-public class DingTalkIdentityProvider
-        extends AbstractOAuth2IdentityProvider<DingTalkProviderConfig>
-        implements SocialIdentityProvider<DingTalkProviderConfig> {
+public class DingDingIdentityProvider
+        extends AbstractOAuth2IdentityProvider<DingDingProviderConfig>
+        implements SocialIdentityProvider<DingDingProviderConfig> {
 
     public static final String AUTH_URL = "https://login.dingtalk.com/oauth2/auth";
     public static final String TOKEN_URL = "https://api.dingtalk.com/v1.0/oauth2/userAccessToken";
@@ -93,7 +93,7 @@ public class DingTalkIdentityProvider
     private Cache<String, String> getCache() {
         return caches.computeIfAbsent(
                 getConfig().getClientId() + ":",
-                DingTalkIdentityProvider::createCache);
+                DingDingIdentityProvider::createCache);
     }
 
     private String getAccessToken(String authCode) {
@@ -140,7 +140,7 @@ public class DingTalkIdentityProvider
         return getAccessToken(authCode);
     }
 
-    public DingTalkIdentityProvider(KeycloakSession session, DingTalkProviderConfig config) {
+    public DingDingIdentityProvider(KeycloakSession session, DingDingProviderConfig config) {
         super(session, config);
         config.setAuthorizationUrl(AUTH_URL);
         config.setTokenUrl(TOKEN_URL);
@@ -297,7 +297,7 @@ public class DingTalkIdentityProvider
                     BrokeredIdentityContext federatedIdentity = getFederatedIdentity(authorizationCode);
 
                     federatedIdentity.setIdpConfig(getConfig());
-                    federatedIdentity.setIdp(DingTalkIdentityProvider.this);
+                    federatedIdentity.setIdp(DingDingIdentityProvider.this);
                     federatedIdentity.setAuthenticationSession(authSession);
 
                     return callback.authenticated(federatedIdentity);

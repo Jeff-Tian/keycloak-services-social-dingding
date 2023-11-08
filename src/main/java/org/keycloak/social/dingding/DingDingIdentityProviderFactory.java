@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.keycloak.social.dingtalk;
+package org.keycloak.social.dingding;
 
 import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
 import org.keycloak.broker.social.SocialIdentityProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 
-public class DingTalkIdentityProviderFactory
-    extends AbstractIdentityProviderFactory<DingTalkIdentityProvider>
-    implements SocialIdentityProviderFactory<DingTalkIdentityProvider> {
+public class DingDingIdentityProviderFactory
+    extends AbstractIdentityProviderFactory<DingDingIdentityProvider>
+    implements SocialIdentityProviderFactory<DingDingIdentityProvider> {
 
   public static final String PROVIDER_ID = "ding-talk";
 
@@ -33,13 +33,13 @@ public class DingTalkIdentityProviderFactory
   }
 
   @Override
-  public DingTalkIdentityProvider create(KeycloakSession session, IdentityProviderModel model) {
-    return new DingTalkIdentityProvider(session, new DingTalkProviderConfig(model));
+  public DingDingIdentityProvider create(KeycloakSession session, IdentityProviderModel model) {
+    return new DingDingIdentityProvider(session, new DingDingProviderConfig(model));
   }
 
   @Override
   public IdentityProviderModel createConfig() {
-    return new DingTalkProviderConfig();
+    return new DingDingProviderConfig();
   }
 
   @Override

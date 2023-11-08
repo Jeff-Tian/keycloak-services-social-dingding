@@ -1,4 +1,4 @@
-package org.keycloak.social.dingtalk.models;
+package org.keycloak.social.dingding.models;
 
 import lombok.AllArgsConstructor;
 
