@@ -97,6 +97,7 @@ public class DingDingIdentityProvider
     }
 
     private String getAccessToken(String authCode) {
+        logger.infov("Getting Access token by ", authCode);
         try {
             String token = getCache().get(ACCESS_TOKEN_CACHE_KEY);
             if (token == null) {
@@ -106,12 +107,20 @@ public class DingDingIdentityProvider
                     if (j == null) {
                         throw new Exception("renew access token error");
                     }
-                    logger.debug("retry in renew access token " + j);
+                    logger.info("retry in renew access token " + j);
                 }
+                logger.infov("Access token is {0}", j.toString());
                 String ACCESS_TOKEN_KEY = "access_token";
                 token = getJsonProperty(j, ACCESS_TOKEN_KEY);
-                long timeout = Integer.parseInt(getJsonProperty(j, "expires_in"));
-                getCache().put(ACCESS_TOKEN_CACHE_KEY, token, timeout, TimeUnit.SECONDS);
+                logger.infov("Access token is {0}", token);
+                logger.infov("expires_in is {0}", getJsonProperty(j, "expires_in"));
+                try {
+                    long timeout = Integer.parseInt(getJsonProperty(j, "expires_in"));
+                    getCache().put(ACCESS_TOKEN_CACHE_KEY, token, timeout, TimeUnit.SECONDS);
+                } catch (Exception ex) {
+                    logger.error(ex);
+                    getCache().put(ACCESS_TOKEN_CACHE_KEY, token, 7200, TimeUnit.SECONDS);
+                }
             }
             return token;
         } catch (Exception e) {
