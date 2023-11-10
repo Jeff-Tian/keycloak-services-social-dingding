@@ -10,7 +10,6 @@
 
     <artifactId>keycloak-services-social-dingding</artifactId>
     <packaging>jar</packaging>
-    <version>22.0.10</version>
 
     <name>Keycloak Services Social DingDing</name>
     <description>Keycloak Services Social DingDing</description>
