@@ -61,7 +61,6 @@
                 </configuration>
             </plugin>
         </plugins>
-        <outputDirectory>target</outputDirectory>
     </build>
 
     <dependencies>
