@@ -5,7 +5,7 @@
     <groupId>org.keycloak</groupId>
     <artifactId>keycloak-services-social-dingding</artifactId>
     <packaging>jar</packaging>
-    <version>22.0.8</version>
+    <version>22.0.9</version>
 
     <name>Keycloak Services Social DingDing</name>
     <description>Keycloak Services Social DingDing</description>
