@@ -172,7 +172,7 @@ public class DingDingIdentityProvider
                 new BrokeredIdentityContext((getJsonProperty(profile, "unionId")));
 
         identity.setUsername(getJsonProperty(profile, "nick").toLowerCase());
-        identity.setBrokerUserId(getJsonProperty(profile, "unionid").toLowerCase());
+        identity.setBrokerUserId(getJsonProperty(profile, "unionId").toLowerCase());
         identity.setModelUsername(getJsonProperty(profile, "nick").toLowerCase());
         String email = getJsonProperty(profile, "email");
         if (email != null) {
